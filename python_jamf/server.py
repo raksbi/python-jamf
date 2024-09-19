@@ -19,7 +19,7 @@ class Server:
         config_path=None,
         hostname=None,
         username=None,
-        password=None,
+        token=None,
         client=None,
         prompt=False,
         debug=False,
@@ -29,14 +29,14 @@ class Server:
             config_path=config_path,
             hostname=hostname,
             username=username,
-            password=password,
+            token=token,
             client=client,
             prompt=prompt,
         )
         if (
             not self.config.hostname
             and not self.config.username
-            and not self.config.password
+            and not self.config.token
             and not self.config.client
         ):
             raise exceptions.JamfConfigError(
@@ -49,14 +49,14 @@ class Server:
             self.classic = Classic(
                 self.config.hostname,
                 self.config.username,
-                self.config.password,
+                self.config.token,
                 client=self.config.client,
             )
         except AuthResponseConnectionError:
             print("Could not connect to " + self.config.hostname)
             exit()
         except JamfAuthException:
-            print("Incorrect username or password for " + self.config.hostname)
+            print("Incorrect username or token for " + self.config.hostname)
             exit()
         except AuthResponseWasNotValid:
             print("Some error for " + self.config.hostname)

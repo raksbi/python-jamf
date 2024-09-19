@@ -37,7 +37,7 @@ class Config:
         config_path=None,
         hostname=None,
         username=None,
-        password=None,
+        token=None,
         client=None,
         prompt=False,
     ):
@@ -45,10 +45,10 @@ class Config:
         self.prompt = prompt
         self.hostname = hostname
         self.username = username
-        self.password = password
+        self.token = token
         self.client = client
         self.config_path = resolve_config_path(config_path)
-        if not self.hostname and not self.username and not self.password:
+        if not self.hostname and not self.username and not self.token:
             self.load()
         # Prompt for any missing prefs
         if not self.hostname:
@@ -63,7 +63,7 @@ class Config:
                 self.client = prompt_userauth()
             else:
                 stderr.write(
-                    "No pref for API Client Auth and prompt is off. Using username and password auth.\n"
+                    "No pref for API Client Auth and prompt is off. Using username and token auth.\n"
                 )
                 self.client = False
         if not self.username:
@@ -73,12 +73,12 @@ class Config:
                 raise JamfConfigError(
                     "Config failed to obtain a username and prompt is off."
                 )
-        if not self.password:
+        if not self.token:
             if self.prompt:
-                self.password = getpass.getpass()
+                self.token = getpass.getpass()
             else:
                 raise JamfConfigError(
-                    "Config failed to obtain a password and prompt is off."
+                    "Config failed to obtain a token and prompt is off."
                 )
         if not self.hostname.startswith("https://") and not self.hostname.startswith(
             "http://"
@@ -118,11 +118,11 @@ the "conf-python-jamf" script.
                     self.client = prefs["APIClientAuth"]
                 else:
                     self.client = False
-                self.password = keyring.get_password(self.hostname, self.username)
+                self.token = keyring.get_password(self.hostname, self.username)
             elif "JSS_URL" in prefs:
                 self.hostname = prefs["JSS_URL"]
                 self.username = prefs["API_USERNAME"]
-                self.password = prefs["API_PASSWORD"]
+                self.token = prefs["API_token"]
             elif "jss_url" in prefs:
                 self.hostname = prefs["jss_url"]
                 # No auth in that file
@@ -130,7 +130,7 @@ the "conf-python-jamf" script.
             raise JamfConfigError(f"Config file does not exist: {self.config_path}")
 
     def save(self):
-        keyring.set_password(self.hostname, self.username, self.password)
+        keyring.set_password(self.hostname, self.username, self.token)
         data = {
             "JSSHostname": self.hostname,
             "Username": self.username,

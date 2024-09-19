@@ -44,7 +44,7 @@ class API(metaclass=Singleton):
     session = False
 
     def __init__(
-        self, config_path=None, hostname=None, username=None, password=None, prompt=True
+        self, config_path=None, hostname=None, username=None, token=None, prompt=True
     ):
         """
         Create requests.Session with JSS address and authentication
@@ -54,7 +54,7 @@ class API(metaclass=Singleton):
                                      to expanduser.
         :param hostname <str>:       Hostname of server
         :param username <str>:       username for server
-        :param password <str>:       password for server
+        :param token <str>:       token for server
         :param prompt <bool>:        Allow the script to prompt if any info is missing
         """
         self.log = logging.getLogger(f"{__name__}.API")
@@ -64,18 +64,18 @@ class API(metaclass=Singleton):
             config_path=config_path,
             hostname=hostname,
             username=username,
-            password=password,
+            token=token,
             prompt=prompt,
         )
         hostname = hostname or self.config.hostname
         self.username = username or self.config.username
-        self.password = password or self.config.password
-        if self.config.password:
+        self.token = token or self.config.token
+        if self.config.token:
             self.save_token_in_keyring = True
         else:
             self.save_token_in_keyring = False
 
-        if not hostname and not self.username and not self.password:
+        if not hostname and not self.username and not self.token:
             raise exceptions.JamfConfigError(
                 "No jamf hostname or credentials could be found."
             )
@@ -90,7 +90,7 @@ class API(metaclass=Singleton):
                 session.headers.update({"Authorization": f"Bearer {old_token}"})
                 url = f"{self.hostname}/api/v1/auth/keep-alive"
             else:
-                session.auth = (self.username, self.password)
+                session.auth = (self.username, self.token)
                 url = f"{self.hostname}/api/v1/auth/token"
             response = self._submit_request(session, "post", url)
             if response.status_code != 200:
@@ -101,7 +101,7 @@ class API(metaclass=Singleton):
             except Exception:
                 print("Couldn't parse bearer token json")
                 return None
-            if self.config.password:
+            if self.config.token:
                 self.config.save_new_token(json_data["token"], json_data["expires"])
             return json_data["token"]
 
@@ -112,7 +112,7 @@ class API(metaclass=Singleton):
         """set the session Jamf Pro API token or basic auth"""
         token = None
         # Check for old token and renew it if found
-        if self.config.password:
+        if self.config.token:
             self.config.load_token()
             if self.config.expired:
                 token = self.get_token(old_token=self.config.token)
@@ -139,7 +139,7 @@ class API(metaclass=Singleton):
         if use_token:
             self.session.headers.update({"Authorization": f"Bearer {token}"})
         else:
-            self.session.auth = (self.username, self.password)
+            self.session.auth = (self.username, self.token)
 
     def _submit_request(self, session, method, url, data=None, raw=False):
         """

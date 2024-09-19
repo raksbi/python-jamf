@@ -36,7 +36,7 @@ class Parser:
             "-u", "--user", help="Specify username/Client ID (default: prompt)"
         )
         self.parser.add_argument(
-            "-p", "--passwd", help="Specify password/Client secret (default: prompt)"
+            "-p", "--passwd", help="Specify token/Client secret (default: prompt)"
         )
         self.parser.add_argument(
             "-r", "--revoke-token", action="store_true", help="Revoke Bearer token"
@@ -58,7 +58,7 @@ class Parser:
             "-P",
             "--print",
             action="store_true",
-            help="Print existing config profile (except password/client secret!)",
+            help="Print existing config profile (except token/client secret!)",
         )
         self.parser.add_argument(
             "-t",
@@ -105,17 +105,17 @@ def print_config(config_path):
     if conf.client:
         print("API Client Authentication")
         username_type = "Client ID"
-        password_type = "Client Secret"
+        token_type = "Client Secret"
     else:
         print("User Authentication")
         username_type = "Username"
-        password_type = "Password"
+        token_type = "token"
     print(f"Hostname: {conf.hostname}")
     print(f"{username_type}: {conf.username}")
-    if conf.password:
-        print(f"{password_type} is set")
+    if conf.token:
+        print(f"{token_type} is set")
     else:
-        print(f"{password_type} is not set")
+        print(f"{token_type} is not set")
 
 
 def revoke_token(config_path):
@@ -137,10 +137,10 @@ def interactive(args, config_path):
         client = python_jamf.config.prompt_userauth()
     if client:
         username_type = "Client ID"
-        password_type = "Client Secret"
+        token_type = "Client Secret"
     else:
         username_type = "Username"
-        password_type = "Password"
+        token_type = "token"
     if args.user:
         user = args.user
     else:
@@ -149,11 +149,11 @@ def interactive(args, config_path):
     if args.passwd:
         passwd = args.passwd
     else:
-        passwd = getpass.getpass(prompt=f"{password_type}: ")
+        passwd = getpass.getpass(prompt=f"{token_type}: ")
     conf = python_jamf.config.Config(
         hostname=hostname,
         username=user,
-        password=passwd,
+        token=passwd,
         client=client,
         prompt=False,
         config_path=config_path,

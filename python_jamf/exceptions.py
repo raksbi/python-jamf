@@ -84,7 +84,7 @@ class APIError(Error):
         self.message = ": ".join(err) or "failed"
         # if response.status_code == 401:
         #     print(
-        #         f'{response.url} returned: "401 Unauthorized". Wrong username/password.'
+        #         f'{response.url} returned: "401 Unauthorized". Wrong username/token.'
         #     )
         # elif response.status_code == 404:
         #     print(

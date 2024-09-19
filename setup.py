@@ -25,7 +25,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="python-jamf",
-    version=jamf_version,
+    version="0.0.1",
     author="The University of Utah",
     author_email="mlib-its-mac@lists.utah.edu",
     description="Python wrapper for Jamf Pro API",
